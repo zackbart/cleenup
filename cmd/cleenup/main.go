@@ -14,11 +14,14 @@ import (
 	"cleenup/internal/state"
 )
 
+var version = "0.1.1"
+
 func main() {
 	root := &cobra.Command{
-		Use:   "cleenup",
-		Short: "Scan Claude Code and Codex logs for leaked secrets",
-		Long:  "Scans ~/.claude and ~/.codex session logs for API keys, tokens, passwords, and other secrets using TruffleHog, entropy analysis, and optional local LLM classification.",
+		Use:     "cleenup",
+		Short:   "Scan Claude Code and Codex logs for leaked secrets",
+		Long:    "Scans ~/.claude and ~/.codex session logs for API keys, tokens, passwords, and other secrets using TruffleHog, entropy analysis, and optional local LLM classification.",
+		Version: version,
 	}
 
 	// scan command
