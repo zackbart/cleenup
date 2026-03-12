@@ -1,0 +1,19 @@
+# Binary (root level only)
+/cleenup
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+/tmp/
+*.tmp
+tests/*.txt
+
+# State and reports (contain sensitive paths)
+# Users should not commit their local state
