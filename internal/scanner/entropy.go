@@ -139,6 +139,16 @@ func DetectEntropy(chunk TextChunk) []report.Finding {
 			continue
 		}
 
+		// Google Drive/Docs IDs — high entropy but not secrets
+		// They appear in contexts like "ID: <token> MIME:" or "docs.google.com/d/<token>"
+		preceding := ""
+		if loc[0] >= 5 {
+			preceding = chunk.Text[loc[0]-5 : loc[0]]
+		}
+		if strings.HasSuffix(preceding, "ID: ") || strings.HasSuffix(preceding, "/d/") {
+			continue
+		}
+
 		// Build context: 40 chars before and after the token
 		contextStart := loc[0] - 40
 		if contextStart < 0 {

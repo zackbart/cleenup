@@ -54,6 +54,9 @@ func Detect(chunk TextChunk) []report.Finding {
 		for _, loc := range locs {
 			matched := text[loc[0]:loc[1]]
 			context := extractContext(text, loc[0], loc[1], 40)
+			if isFalsePositivePattern(matched, context) {
+				continue
+			}
 			findings = append(findings, report.Finding{
 				Source:      chunk.Source,
 				SessionFile: chunk.SessionFile,
@@ -130,11 +133,58 @@ func isFalsePositive(value string) bool {
 		return true
 	}
 	// Template/example values like sk_live_your_key, pk_test_example
-	// Only match if these appear as prefixes or the whole value looks like a template
 	if strings.HasPrefix(lower, "your_") || strings.HasPrefix(lower, "your-") ||
 		strings.HasPrefix(lower, "dummy") || strings.HasPrefix(lower, "sample") ||
 		strings.HasPrefix(lower, "test_") || strings.HasPrefix(lower, "example") ||
 		lower == "example" {
+		return true
+	}
+	// Localhost/placeholder connection strings and paths are not secrets
+	if strings.Contains(lower, "localhost") ||
+		strings.Contains(lower, "127.0.0.1") ||
+		strings.Contains(lower, "user:pass@") ||
+		strings.Contains(lower, "username:password@") ||
+		strings.HasPrefix(value, "/api/") ||
+		strings.HasPrefix(value, "/v1/") ||
+		strings.HasPrefix(value, "/v2/") {
+		return true
+	}
+	// Variable references (import.meta.env.X, process.env.X) are not secrets
+	if strings.HasPrefix(value, "import.meta.env") {
+		return true
+	}
+	// Values that are clearly identifiers/constants, not secrets
+	// (e.g., "school_refresh_token", "oauth_state:", "user.password_change")
+	if strings.HasPrefix(lower, "oauth_") ||
+		value == lower && !strings.ContainsAny(value, "0123456789@:/") {
+		// All-lowercase with no digits/special chars is likely a constant name, not a secret
+		return true
+	}
+	// Already-redacted Sentry DSNs (xxx@oyyy patterns from prior runs)
+	if strings.Contains(value, "xxx@") || strings.Contains(value, "...@") {
+		return true
+	}
+	return false
+}
+
+// isFalsePositivePattern returns true if a regex pattern match is actually
+// inside a code snippet, documentation example, or other non-secret context.
+func isFalsePositivePattern(matched, context string) bool {
+	// Pattern strings inside regex definitions or code examples
+	if strings.Contains(context, "r'"+matched) ||
+		strings.Contains(context, "r\""+matched) ||
+		strings.Contains(context, "regexp.MustCompile") ||
+		strings.Contains(context, "re.compile") ||
+		strings.Contains(context, `\`+matched) ||
+		strings.Contains(context, ", \""+matched[:10]) {
+		return true
+	}
+	// Documentation/example connection strings with placeholder credentials
+	lower := strings.ToLower(matched)
+	if strings.Contains(lower, "user:pass@") ||
+		strings.Contains(lower, "username:password@") ||
+		strings.Contains(lower, "dev:password@localhost") ||
+		strings.Contains(lower, "admin:admin@") {
 		return true
 	}
 	return false
