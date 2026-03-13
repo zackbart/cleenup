@@ -67,7 +67,7 @@ func (r *Redactor) Run() ([]string, error) {
 
 		// c. Replace each finding — both raw and JSON-escaped forms
 		for _, f := range deduped {
-			replacement := fmt.Sprintf("[REDACTED:%s]", f.PatternName)
+			replacement := "REDACTED_BY_CLEENUP"
 			before := content
 
 			// Replace the raw form
@@ -117,7 +117,7 @@ func (r *Redactor) Run() ([]string, error) {
 			fmt.Printf("  %s\n", filePath)
 			for _, f := range deduped {
 				masked := maskValue(f.MatchedText)
-				replacement := fmt.Sprintf("[REDACTED:%s]", f.PatternName)
+				replacement := "REDACTED_BY_CLEENUP"
 				fmt.Printf("    would redact: %s → %s\n", masked, replacement)
 			}
 		}

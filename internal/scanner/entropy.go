@@ -47,7 +47,8 @@ var knownNonSecretPrefixes = []string{
 	"sha1-",      // Git/hash references
 	"agent-a",    // Claude agent IDs
 	"acompact-",  // Claude compact IDs
-	"[REDACTED",  // Already-redacted markers from previous cleenup runs
+	"[REDACTED",       // Already-redacted markers from previous cleenup runs
+	"REDACTED_BY_CLE", // Current redaction marker
 }
 
 func isKnownNonSecretPrefix(token string) bool {

@@ -14,7 +14,7 @@ import (
 	"cleenup/internal/state"
 )
 
-var version = "0.1.2"
+var version = "0.1.3"
 
 func main() {
 	root := &cobra.Command{

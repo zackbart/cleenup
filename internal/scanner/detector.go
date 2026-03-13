@@ -126,7 +126,8 @@ func isFalsePositive(value string) bool {
 		strings.HasPrefix(value, "process.env") ||
 		strings.HasPrefix(value, "os.environ") ||
 		strings.HasPrefix(value, "os.getenv") ||
-		strings.HasPrefix(value, "[REDACTED") {
+		strings.HasPrefix(value, "[REDACTED") ||
+		value == "REDACTED_BY_CLEENUP" {
 		return true
 	}
 	if falsePositivePrefixPattern.MatchString(value) {
